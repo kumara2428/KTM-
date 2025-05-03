@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>KTM - Web voice Assistant</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* Global Styles */
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: white;
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+    body.light-mode {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      color: #333;
+    }
+    .container {
+      width: 90%;
+      max-width: 800px;
+      margin: 40px auto;
+      background-color: rgba(0, 0, 0, 0.7);
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: background-color 0.3s, border 0.3s;
+    }
+    body {
+  background-image: url('background.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: white;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 20px;
+}
+
+    body.light-mode .container {
+      background-color: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    h1, h2 {
+      margin: 10px 0;
+      font-weight: 500;
+      text-align: center;
+    }
+    /* Login Screen */
+    #login-screen {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    #login-screen input {
+      padding: 12px;
+      width: 80%;
+      max-width: 300px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 10px;
+      font-size: 17px;
+    }
+    #login-screen button {
+      background-color: #0f62fe;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 5px;
+      transition: background 0.2s;
+    }
+    #login-screen button:hover {
+      background-color: #0a50d0;
+    }
+    /* Main Interface */
+    #main-interface {
+      display: none;
+    }
+    #robot-photo {
+      width: 180px;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 50%;
+      margin: 10px auto;
+      border: 4px solid #0f62fe;
+      box-shadow: 0 4px 15px rgba(15, 98, 254, 0.4);
+      display: block;
+    }
+    #conversation {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-left: 3px solid #0f62fe;
+      border-radius: 8px;
+      padding: 15px;
+      min-height: 100px;
+      max-height: 150px;
+      overflow-y: auto;
+      margin: 20px 0;
+    }
+    .message {
+      margin: 10px 0;
+      padding: 8px;
+      border-radius: 5px;
+    }
+    .user-message {
+      background-color: rgba(15, 98, 254, 0.2);
+    }
+    .assistant-message {
+      background-color: rgba(15, 98, 254, 0.4);
+    }
+    /* Voice Bar */
+    #voice-bar {
+      width: 400px;
+      height: 20px;
+      background: black;
+      margin: 10px auto;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    #voice-progress {
+      width: 0%;
+      height: 100%;
+      background: green; 
+      transition: width 0.3s;
+    }
+    /* Input and Buttons */
+    input[type="text"] {
+      padding: 14px;
+      width: 80%;
+      max-width: 400px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      margin: 20px 0;
+      background-color: rgba(255, 255, 255, 0.9);
+      box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    input[type="text"]:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px #0f62fe;
+    }
+    button {
+      background-color: #0f62fe;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+      margin: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+    button:hover {
+      background-color: #0a50d0;
+      transform: translateY(-2px);
+    }
+    button:active {
+      transform: translateY(0);
+    }
+    /* Floating 3-Dot Menu */
+    .menu-btn {
+      width: 45px;
+      height: 45px;
+      font-size: 20px;
+      background-color: rgba(15, 98, 254, 0.9);
+      color: white;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+      transition: all 0.2s ease;
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      border: none;
+    }
+    .menu-btn:hover {
+      background-color: #0a50d0;
+      transform: scale(1.1);
+    }
+    .menu {
+      display: none;
+      background-color: rgba(30, 30, 40, 0.95);
+      border-radius: 8px;
+      padding: 10px 0;
+      flex-direction: column;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      width: 180px;
+      position: fixed;
+      top: 80px;
+      right: 20px;
+      z-index: 100;
+    }
+    .menu a {
+      color: white;
+      padding: 12px 20px;
+      text-decoration: none;
+      font-size: 15px;
+      text-align: left;
+      transition: all 0.2s ease;
+      display: block;
+    }
+    .menu a:hover {
+      background-color: rgba(15, 98, 254, 0.2);
+    }
+    @media (max-width: 600px) {
+      .container {
+        width: 95%;
+        padding: 20px;
+      }
+      input[type="text"] {
+        width: 90%;
+      }
+      button {
+        padding: 12px 18px;
+      }
+       body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: rgb(12, 4, 4);
+      min-height: 100vh;
+      transition: background 0.3s, color 0.3s;
+    }
+    body{
+  background-image: url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1950&q=80');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: white;
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 20px;
+}
+    body.light-mode {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      color: #333;
+    }
+    .container {
+      width: 90%;
+      max-width: 800px;
+      margin: 40px auto;
+      background-color: rgba(0, 0, 0, 0.7);
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: background-color 0.3s, border 0.3s;
+    }
+    body.light-mode .container {
+      background-color: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    h1, h2 {
+      margin: 10px 0;
+      font-weight: 500;
+      text-align: center;
+    }
+    /* Start Page */
+    #start-page {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+    #start-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+    #robot-image {
+      width: 200px;
+      height: auto;
+      margin: 20px auto;
+    }
+    .start-button {
+      padding: 15px 30px;
+      font-size: 20px;
+      color: white;
+      background-color: #0f62fe;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .start-button:hover {
+      background-color: #0a50d0;
+    }
+    /* Login Screen */
+    #login-screen {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    #login-screen input {
+      padding: 12px;
+      width: 80%;
+      max-width: 300px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 10px;
+      font-size: 17px;
+    }
+    #login-screen button {
+      background-color: #01112f;
+      color: rgb(148, 0, 0);
+      border: none;
+      padding: 10px 20px;
+      font-size: 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 5px;
+      transition: background 0.2s;
+    }
+    #login-screen button:hover {
+      background-color: #02266a;
+    }
+    /* Main Interface */
+    #main-interface {
+      display: none;
+    }
+  
+    #conversation {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-left: 3px solid #0f62fe;
+      border-radius: 8px;
+      padding: 15px;
+      min-height: 100px;
+      max-height: 150px;
+      overflow-y: auto;
+      margin: 20px 0;
+    }
+    .message {
+      margin: 10px 0;
+      padding: 8px;
+      border-radius: 5px;
+    }
+    .user-message {
+      background-color: rgba(15, 98, 254, 0.2);
+    }
+    .assistant-message {
+      background-color: rgba(15, 98, 254, 0.4);
+    }
+    @media (max-width: 600px) {
+      .container {
+        width: 95%;
+        padding: 20px;
+      }
+      input[type="text"] {
+        width: 90%;
+      }
+      button {
+        padding: 12px 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+   
+  <!-- Floating Menu Button and Menu -->
+  <button class="menu-btn" onclick="toggleMenu()">☰</button>
+  <div class="menu" id="menu">
+    <button id="voiceButton">🎤 Speak</button>
+    <button onclick="fetchWeather()">🌡 Temp</button>
+    <button onclick="fetchNews()">📰 News</button>
+    <button onclick="toggleTheme()">🌓 Theme</button>
+    <button onclick="toggleVoice()">🔈 Voice</button>
+    <button onclick="downloadAssistant()">⬇ Download</button>
+  </div>
+  
+  <div class="container">
+    <!-- Login Screen -->
+    <div id="login-screen">
+      <h2>Login with Email</h2>
+      <input type="email" id="email" placeholder="Enter email" autocomplete="off">
+      <br>
+      <button onclick="sendOTP()"> 📱Send OTP</button>
+      <br>
+      <input type="text" id="otp" placeholder="Enter OTP" autocomplete="off">
+      <br>
+      <button onclick="verifyOTP()"> ✔Verify OTP</button>
+    </div>
+
+    <!-- Main Interface -->
+    <div id="main-interface">
+      <img src="https://media.craiyon.com/2025-04-02/DJ5P_iPoRkGGUBXl3sQI0w.webp" id="robot-photo" alt="Robot Photo">
+      <h1>KTM - Web voice Assistant</h1>
+      <!-- Conversation Area -->
+      <div id="conversation"></div>
+      <!-- Voice Progress Bar -->
+      <div id="voice-bar">
+        <div id="voice-progress"></div>
+      </div>
+      </div>
+    
+      <!-- Language Selection -->
+      <select id="language" style="padding:8px; border-radius:5px; margin:10px 0;">
+        <option value="en-US">🇳🇿English</option>
+        <option value="hi-IN">🇮🇳Hindi</option>
+        <option value="tam-IN">🇮🇳Tamil</option>
+      </select>
+      <br>
+      <!-- Input and Buttons -->
+      <input type="text" id="textInput" placeholder="🖊Type a command here..." autocomplete="off">
+      <br>
+      <button onclick="handleTextCommand()">📨 Send</button>
+      <button id="voiceBtn" onclick="toggleListening()">🎙 Start Listening</button>
+    </div>
+  
+  
+  <script>
+    let listening = false;
+    let recognition = null;
+    let isMaleVoice = true; // switch between male/female (simulated)
+    const resultDiv = document.getElementById("conversation");
+
+    /* ----------------- Login Functions ----------------- */
+    function sendOTP() {
+      // Simulated OTP send – here you would implement backend communication.
+      alert("OTP sent to " + document.getElementById("email").value);
+    }
+    function verifyOTP() {
+      // Simulated OTP verification.
+      document.getElementById("login-screen").style.display = 'none';
+      document.getElementById("main-interface").style.display = 'block';
+      updateUI("System: Login successful. Assistant initialized. Say 'professor' to activate.");
+    }
+
+    /* ----------------- UI Functions ----------------- */
+    function updateUI(message, isUser = false) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'message ' + (isUser ? 'user-message' : 'assistant-message');
+      msgDiv.innerText = (isUser ? "User: " : "Assistant: ") + message;
+      resultDiv.appendChild(msgDiv);
+      resultDiv.scrollTop = resultDiv.scrollHeight;
+    }
+    function animateVoiceBar() {
+      const progress = document.getElementById('voice-progress');
+      progress.style.width = '100%';
+      setTimeout(() => progress.style.width = '0%', 500);
+    }
+
+    /* ----------------- Speech Functions ----------------- */
+    function speak(text) {
+      const synth = window.speechSynthesis;
+      const utter = new SpeechSynthesisUtterance(text);
+      // Use selected language from dropdown
+      utter.lang = document.getElementById('language').value;
+      // Modify voice properties based on isMaleVoice (simulation)
+      utter.pitch = isMaleVoice ? 1 : 1.2;
+      utter.rate = 1;
+      synth.cancel();
+      synth.speak(utter);
+      animateVoiceBar();
+    }
+
+    function processCommand(command) {
+      command = command.toLowerCase();
+      let response = "";
+      if (command.includes("time")) {
+        const time = new Date().toLocaleTimeString(undefined, { timeStyle: 'short' });
+        response = "The time is 🕰 " + time;
+      } else if (command.includes("date")) {
+        response = "Today's date is " + new Date().toLocaleDateString();
+      } else if (command.includes("open google")) {
+        response = "Opening Google.";
+        window.open("https://www.google.com", "_blank");
+      } else if (command.includes("search for")) {
+        const query = command.split("search for")[1].trim();
+        response = "Searching for " + query;
+        window.open("https://www.google.com/search?q=" + encodeURIComponent(query), "_blank");
+      } else if (command.includes("open youtube")) {
+        response = "Opening YouTube.";
+        window.open("https://www.youtube.com", "_blank");
+      } else if (command.includes("open whatsapp")) {
+        response = "Opening WhatsApp.";
+        window.open("https://web.whatsapp.com", "_blank");
+      } else if (command.includes("joke")) {
+        const jokes = [
+          "Why did the computer go to therapy? It had too many bytes of emotional baggage.",
+          "What do you call a robot that tells jokes? A laugh-bot.",
+          "Why did the student bring a ladder to school? They wanted to go to high school."
+        ];
+        response = jokes[Math.floor(Math.random() * jokes.length)];
+      } else if (command.includes("who are you") || command.includes("your name")) {
+        response = "I am KTM , your personal web voice assistant.";
+      } else if (command.includes("hello") || command.includes("hi")) {
+        response = "Hello! How can I assist you today?";
+      } else if (command.includes("placement percentage") || command.includes("hi")) {
+        response = "The percentage of students who got internships is 40%, and the students who got placed is about 50%.";
+      } else if (command.includes("j.p.college")) {
+        response = "J.P.College of Engineering offers top-quality education. Visit jpce.ac.in for more information.";
+      } else if (command.includes("jp college staff")) {
+        response = "JP College staff include Dr. Arun - Principal, contact 9876543210.";
+      } else if (command.includes("jp college details")) {
+        response = "j P College, established in 2007, offers engineering programs."
+                    "In the year 2012, the college was bought and run by the DMI Foundations. From then the institute was run by the Sisters of Daughters of Mary Immaculate and Fathers of Missionaries of Mary Immaculate.";
+      } else if (command.includes("sprorts")) {
+        response = "J.P.College of Engineering offers top-quality education. Visit jpce.ac.in for more information.";
+      } else if (command.includes("about jp college","about")) {
+    response = "JP College of Engineering is a premier institution offering quality education in engineering and technology.";
+  } else if (command.includes("contact jp college")) {
+    response = "You can contact JP College of Engineering at +91-8012520500 or email us at principle@jpcoe.ac.in";
+  } else if (command.includes("departments in jp college")) {
+    response = "The departments in JP College include Artificial Intelligence & Data Science, information technology, Computer Science, Electronics, Mechanical, Civil, and Electrical Engineering.";
+  } else if (command.includes("events at jp college",)) {
+    response = "Upcoming events: Annual Tech Fest on May 15, 2025, and Alumni Meet on June 20, 2025.";
+  } else if (command.includes("admissions at jp college")) {
+    response = "Admissions are open! Visit our website at jpcollege.edu/admissions for more details.";
+  } else if (command.includes("open jp college website","website")) {
+    response = "Opening JP College of Engineering's official website.";
+    window.open("https://www.jpcoe.ac.in", "_blank");
+  }else if (command.includes("how are you")) {
+        response = "I'm doing great, thank you!";
+      } else if (command.includes("exit") || command.includes("stop")) {
+        response = "Goodbye!";
+      } else {
+        response = "Sorry, I didn't understand that.";
+      }
+      updateUI(response);
+      speak(response);
+    }
+    
+
+    /* ----------------- Voice/Listening Functions ----------------- */
+    function startSpeechRecognition() {
+      if (!('SpeechRecognition' in window) && !('webkitSpeechRecognition' in window)) {
+        alert("Sorry, your browser doesn't support the Web Speech API.");
+        return;
+      }
+      recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = document.getElementById('language').value;
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        updateUI(transcript, true);
+        processCommand(transcript);
+      };
+      recognition.onerror = (event) => {
+        updateUI("Error: " + event.error);
+        speak("I didn't catch that. Please try again.");
+      };
+      recognition.onend = () => {
+        // Reset the mic button state
+        document.getElementById("voiceBtn").textContent = "🎙 Start Listening";
+        listening = false;
+      };
+      recognition.start();
+    }
+
+    function stopSpeechRecognition() {
+      if (recognition) {
+        recognition.stop();
+      }
+    }
+
+    function toggleListening() {
+      listening = !listening;
+      const voiceBtn = document.getElementById("voiceBtn");
+      if (listening) {
+        voiceBtn.textContent = "🔴 Stop Listening";
+        voiceBtn.style.backgroundColor = "red";
+        startSpeechRecognition();
+      } else {
+        voiceBtn.textContent = "🎙 Start Listening";
+        voiceBtn.style.backgroundColor = "#0f62fe";
+        stopSpeechRecognition();
+        
+      }
+    }
+
+    /* ----------------- Text Command ----------------- */
+    function handleTextCommand() {
+      const textInput = document.getElementById("textInput").value.trim();
+      if (textInput === "") return;
+      updateUI(textInput, true);
+      processCommand(textInput);
+      document.getElementById("textInput").value = "";
+    }
+
+    /* ----------------- Menu Functions ----------------- */
+    function toggleMenu() {
+      const menu = document.getElementById("menu");
+      menu.style.display = (menu.style.display === "flex") ? "none" : "flex";
+    }
+    function toggleTheme() {
+      document.body.classList.toggle("light-mode");
+      toggleMenu(); // Close menu after toggle
+    }
+    function toggleVoice() {
+      isMaleVoice = !isMaleVoice;
+      speak(isMaleVoice ? "Switched to male voice." : "Switched to female voice.");
+      toggleMenu();
+    }
+    function downloadApp() {
+      const downloadUrl = "https://yourdownloadlink.com/app.apk"; // Replace with your actual link
+      window.location.href = downloadUrl;
+    }
+
+    /* ----------------- Initialization ----------------- */
+    window.onload = () => {
+      // If you want to auto-skip the login for testing, uncomment the two lines below:
+      // document.getElementById("login-screen").style.display = 'none';
+      // document.getElementById("main-interface").style.display = 'block';
+      speak("Welcome! Please log in with your email.");
+    };
+  </script>
+</body>
+</html>
